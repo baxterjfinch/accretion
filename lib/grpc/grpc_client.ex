@@ -28,7 +28,8 @@ defmodule Accretion.BeaconClient do
   @impl true
   def init(channel) do
     GenServer.cast(@name, {:sync_status})
-    GenServer.cast(@name, {:list_peers})
+    # GenServer.cast(@name, {:list_peers})
+    GenServer.cast(@name, {:stream_chain_head})
     {:ok, channel}
   end
 
@@ -37,7 +38,7 @@ defmodule Accretion.BeaconClient do
     req = Google.Protobuf.Empty.new()
     case channel |> Ethereum.Eth.V1alpha1.Node.Stub.get_sync_status(req) do
       {:ok, status} ->
-        Logger.info("STREAM: #{inspect status}")
+        Logger.info("Sync Status: #{inspect status}")
 
         # Enum.each(stream, fn {:ok, block} ->
         #   FinalMix.Watcher.stream_block(block)
@@ -62,6 +63,22 @@ defmodule Accretion.BeaconClient do
       {:error, err} ->
         Logger.info("ERR: #{inspect err}")
 
+        IO.inspect(err)
+    end
+
+    {:noreply, channel}
+  end
+
+  @impl true
+  def handle_cast({:stream_chain_head}, channel) do
+    req = Google.Protobuf.Empty.new()
+    case channel |> Ethereum.Eth.V1alpha1.BeaconChain.Stub.stream_chain_head(req) do
+      {:ok, stream} ->
+        Enum.each(stream, fn {:ok, head} ->
+          Logger.info("STREAM: #{inspect head}")
+        end)
+      {:error, err} ->
+        Logger.info("ERR: #{inspect err}")
         IO.inspect(err)
     end
 
