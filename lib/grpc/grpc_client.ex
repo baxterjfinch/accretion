@@ -40,10 +40,6 @@ defmodule Accretion.BeaconClient do
       {:ok, status} ->
         Logger.info("Sync Status: #{inspect status}")
 
-        # Enum.each(stream, fn {:ok, block} ->
-        #   FinalMix.Watcher.stream_block(block)
-        # end)
-
       {:error, err} ->
         Logger.info("ERR: #{inspect err}")
 
