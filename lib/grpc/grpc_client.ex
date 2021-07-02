@@ -55,10 +55,8 @@ defmodule Accretion.BeaconClient do
     case channel |> Ethereum.Eth.V1alpha1.Node.Stub.list_peers(req) do
       {:ok, peers} ->
         Logger.info("Peers: #{inspect peers}")
-
       {:error, err} ->
         Logger.info("ERR: #{inspect err}")
-
         IO.inspect(err)
     end
 
@@ -71,7 +69,7 @@ defmodule Accretion.BeaconClient do
     case channel |> Ethereum.Eth.V1alpha1.BeaconChain.Stub.stream_chain_head(req) do
       {:ok, stream} ->
         Enum.each(stream, fn {:ok, head} ->
-          Logger.info("STREAM: #{inspect head}")
+          Accretion.SSZ.deserialize_block(head)
         end)
       {:error, err} ->
         Logger.info("ERR: #{inspect err}")
