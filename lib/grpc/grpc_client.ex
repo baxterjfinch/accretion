@@ -28,7 +28,7 @@ defmodule Accretion.BeaconClient do
   @impl true
   def init(channel) do
     GenServer.cast(@name, {:sync_status})
-    # GenServer.cast(@name, {:list_peers})
+    GenServer.cast(@name, {:list_peers})
     GenServer.cast(@name, {:stream_chain_head})
     {:ok, channel}
   end
@@ -69,7 +69,7 @@ defmodule Accretion.BeaconClient do
     case channel |> Ethereum.Eth.V1alpha1.BeaconChain.Stub.stream_chain_head(req) do
       {:ok, stream} ->
         Enum.each(stream, fn {:ok, head} ->
-          Accretion.SSZ.deserialize_block(head)
+          Logger.debug(Accretion.SSZ.chain_head(head))
         end)
       {:error, err} ->
         Logger.info("ERR: #{inspect err}")
